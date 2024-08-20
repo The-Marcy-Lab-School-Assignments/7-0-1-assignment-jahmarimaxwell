@@ -1,11 +1,9 @@
 import NavBar from './components/NavBar';
 import GifContainer from './components/GifContainer';
 import GifSearch from './components/GifSearch';
-import { handleFetch } from './utils';
-import API_KEY from './config.js';
 import { useEffect, useState } from 'react';
 
-const api = `https://api.giphy.com/v1/gifs/trending?api_key=${API_KEY}&limit=3&rating=g`;
+const api = `https://pokeapi.co/api/v2/pokemon/${value}/`;
 
 const List = ({ data }) => {
   return (
@@ -20,26 +18,15 @@ const List = ({ data }) => {
     </ul>
   )
 }
-const Form = ({handleSubmit}) => {
-  const [inputValue, setInputValue] = useState('');
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="textInput">Enter Some Text </label>
-      <input type="text" id="textInput" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-      <button type="submit">Submit</button>
-    </form>
-  )
-}
-
-const GifFetcher = () => {
-const [gif, setGif] = useState();
-const [error, setError] = useState();
+const PokemonSearcher = () => {
+    const [gif, setGif] = useState();
+    const [error, setError] = useState();
   
     useEffect(() => {
       const doFetch = async () => {
         const [data, error] = await handleFetch(api);
-        console.log(data);
+        console.log(data[0]);
         if (data) setGif(data);
         if (error) setError(error);
       };
@@ -52,6 +39,17 @@ const [error, setError] = useState();
       if (error) setError(error);
     }
     if (error) return <p>{error.message}</p>
+  }
+  const Form = ({handleSubmit}) => {
+    const [inputValue, setInputValue] = useState('');
+  
+    return (
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="textInput" placeholder="Enter Some Text"> </label>
+        <input type="text" id="textInput" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+        <button type="submit">Submit</button>
+      </form>
+    )
   }
 
 function App() {
