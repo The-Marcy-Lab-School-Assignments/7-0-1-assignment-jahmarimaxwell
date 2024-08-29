@@ -1,74 +1,53 @@
-import NavBar from './components/NavBar';
-import GifContainer from './components/GifContainer';
-import GifSearch from './components/GifSearch';
+import { useState, useEffect } from 'react'; // Import React and necessary hooks
+import NavBar from './components/NavBar'
+import GifContainer from './components/GifContainer'
+import GifSearch from './components/GifSearch'
+import './index.css';
+import API_KEY from './config'
 import { handleFetch } from './utils';
-import API_KEY from './config.js';
-import { useEffect, useState } from 'react';
 
-const api = `https://api.giphy.com/v1/gifs/trending?api_key=${API_KEY}&limit=3&rating=g`;
-
-const List = ({ data }) => {
-  return (
-    <ul>
-      {
-        data?.map((thing) => (
-          <li key={thing.title}>
-            <p>{thing.images}</p>
-          </li>
-        ))
-      }
-    </ul>
-  )
-}
-
-const GifFetcher = () => {
-    const [gif, setGif] = useState();
-    const [error, setError] = useState();
-  
-    useEffect(() => {
-      const doFetch = async () => {
-        const [data, error] = await handleFetch(api);
-        console.log(data[0]);
-        if (data) setGif(data);
-        if (error) setError(error);
-      };
-      doFetch();
-    }, []);
-
-    const handleClick = async () => {
-      const [data, error] = await handleFetch(api);
-      if (data) setGif(data.title);
-      if (error) setError(error);
-    }
-    if (error) return <p>{error.message}</p>
-  }
-  const Form = ({handleSubmit}) => {
-    const [inputValue, setInputValue] = useState('');
-  
-    return (
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="textInput" placeholder="Enter Some Text"> </label>
-        <input type="text" id="textInput" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-        <button type="submit">Submit</button>
-      </form>
-    )
-  }
 
 function App() {
+  // State variables to manage GIF list, errors, and search query
+  const [gifList, setGifList] = useState([]); // State to store the list of GIFs
+  const [error, setError] = useState(''); // State to store error messages
+  const [query, setQuery] = useState(''); // State to store the current search query
+
+  const GIF_API2 = `https://api.giphy.com/v1/gifs/trending?api_key=${API_KEY}&limit=3&rating=g`;
+  const GIF_SEARCH_API = `https://api.giphy.com/v1/gifs/search?api_key=${API_KEY}&q=${query}&limit=3&rating=g`;
+
+  // useEffect hook to fetch trending GIFs when the component mounts
+  useEffect(() => {
+    const fetchGifs = async () => {
+      try {
+        // Fetch trending GIFs from the Giphy API
+        const response = await fetch(query ? GIF_SEARCH_API : GIF_API2)
+        const data = await response.json(); // Parse the response as JSON
+        if (data.data && data.data.length > 0) {
+          setGifList(data.data); // Update state with the fetched GIFs
+        }
+      } catch (error) {
+        setError(error); // Update state with any errors encountered during fetching
+      }
+    };
+    fetchGifs(); // Call the function to fetch GIFs
+  }, [query]); // Empty dependency array ensures this runs only once when the component mounts
+
+  useEffect(() => {
+    console.log(gifList) //randy  - console.log to check whats happening
+  }, [gifList])
+
+  //PASS setQuery IN SO GIFSEARCH CAN USE IT
+  //PASS gifList IN SO GIFCONTAINER CAN USE IT
   return (
-    <>
     <div>
       <NavBar color='black' title="Giphy Search" />
       <div className="ui container">
-        <GifSearch />
-        <GifFetcher />
+        <GifSearch setQuery={setQuery} />
         <br />
-        <GifContainer />
-        <Form />
-        <List />
+        <GifContainer gifList={gifList} />
       </div>
     </div>
-    </>
   );
 }
 
